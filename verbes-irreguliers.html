@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verbes irréguliers anglais — Entraînement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Slab:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14181F;
+  --panel:#1E2430;
+  --panel-alt:#262D3B;
+  --line:#333B4D;
+  --paper:#E7E2D3;
+  --muted:#9AA0B0;
+  --brass:#C9A24B;
+  --brass-soft:rgba(201,162,75,.16);
+  --go:#74BE8E;
+  --go-soft:rgba(116,190,142,.18);
+  --stop:#C75450;
+  --stop-soft:rgba(199,84,80,.16);
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--paper);}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+#app{min-height:100vh;}
+.wrap{width:100%;max-width:640px;margin:0 auto;padding:28px 20px 60px;}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px;font-size:13px;}
+.brand{font-weight:600;}
+.stat{font-family:'IBM Plex Mono',monospace;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+.intro h1{
+  font-family:'IBM Plex Slab',serif;
+  font-weight:600;
+  font-size:clamp(26px,5.5vw,38px);
+  line-height:1.18;
+  margin:0 0 16px;
+  max-width:16ch;
+}
+.intro .lede{color:var(--paper);font-size:15px;line-height:1.65;max-width:62ch;margin:0 0 10px;}
+.intro .caption{color:var(--muted);font-size:13px;line-height:1.6;max-width:62ch;margin:0 0 30px;}
+
+.ledger{list-style:none;margin:0 0 8px;padding:0;border-top:1px solid var(--line);}
+.row{
+  display:grid;
+  grid-template-columns:32px 64px 1fr auto;
+  align-items:center;
+  gap:14px;
+  padding:14px 6px;
+  border-bottom:1px solid var(--line);
+  cursor:pointer;
+}
+.row:hover:not(.is-locked){background:var(--panel-alt);}
+.row.is-locked{cursor:default;}
+.row-num{font-family:'IBM Plex Mono',monospace;color:var(--brass);font-size:14px;}
+.row.is-locked .row-num{color:var(--muted);}
+.row-range{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);}
+.row-preview{font-size:15px;}
+.row.is-locked .row-preview{color:var(--muted);}
+.status{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap;}
+.status svg{width:14px;height:14px;flex:none;}
+.status.locked{color:var(--muted);}
+.status.done{color:var(--go);font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+.status.ready{color:var(--brass);}
+
+.reset-link{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:8px 0;text-decoration:underline;text-decoration-color:var(--line);font-family:inherit;}
+.reset-link:hover{color:var(--stop);}
+
+.ghost-btn{
+  background:none;border:1px solid var(--line);color:var(--paper);
+  font-family:'IBM Plex Sans',sans-serif;font-size:13px;padding:8px 14px;
+  border-radius:8px;cursor:pointer;
+}
+.ghost-btn:hover{border-color:var(--brass);color:var(--brass);}
+
+.session .top{margin-bottom:20px;}
+.timer{font-family:'IBM Plex Mono',monospace;font-size:20px;font-variant-numeric:tabular-nums;}
+.group-tag{color:var(--muted);}
+
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+.dot.done{background:var(--brass);}
+.dot.current{background:var(--paper);transform:scale(1.5);}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:38px 28px;
+  text-align:center;
+}
+.verb-display{
+  font-family:'IBM Plex Slab',serif;
+  font-weight:600;
+  font-size:clamp(28px,7vw,42px);
+  margin-bottom:32px;
+  word-break:break-word;
+}
+.field{display:block;text-align:left;margin-bottom:18px;}
+.field-label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+.field input{
+  width:100%;background:transparent;border:none;border-bottom:2px solid var(--line);
+  color:var(--paper);font-family:'IBM Plex Sans',sans-serif;font-size:17px;
+  padding:8px 2px;outline:none;
+}
+.field input:focus{border-bottom-color:var(--brass);}
+.field input.ok{border-bottom-color:var(--go);color:var(--go);}
+.field input.bad{border-bottom-color:var(--stop);color:var(--stop);}
+.field-feedback{font-size:13px;color:var(--stop);margin-top:6px;min-height:18px;}
+
+.actions{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
+.primary-btn{
+  background:var(--brass);color:#1C1400;border:none;
+  font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:15px;
+  padding:13px 20px;border-radius:8px;cursor:pointer;
+}
+.primary-btn:hover{filter:brightness(1.08);}
+.error-msg{color:var(--stop);font-size:14px;margin:4px 0 2px;}
+
+.panel.flash-go{animation:flashGo .45s ease;}
+@keyframes flashGo{
+  0%{border-color:var(--line);box-shadow:none;}
+  40%{border-color:var(--go);box-shadow:0 0 0 6px var(--go-soft);}
+  100%{border-color:var(--line);box-shadow:none;}
+}
+.panel.flash-stop{border-color:var(--stop);animation:shake .4s ease;}
+@keyframes shake{
+  10%,90%{transform:translateX(-1px);}
+  20%,80%{transform:translateX(2px);}
+  30%,50%,70%{transform:translateX(-4px);}
+  40%,60%{transform:translateX(4px);}
+}
+
+.complete-title{font-family:'IBM Plex Slab',serif;font-size:22px;font-weight:600;margin:0 0 20px;}
+.big-time{font-family:'IBM Plex Mono',monospace;font-size:46px;color:var(--brass);font-variant-numeric:tabular-nums;margin-bottom:10px;}
+.record-line{color:var(--muted);font-size:14px;margin-bottom:28px;}
+.done-all{color:var(--go);font-size:14px;margin-bottom:10px;}
+
+.loading{color:var(--muted);font-size:14px;text-align:center;padding-top:40px;}
+
+@media (prefers-reduced-motion:reduce){
+  .panel.flash-go,.panel.flash-stop{animation:none;}
+}
+@media (max-width:480px){
+  .row{grid-template-columns:26px 1fr auto;}
+  .row-range{display:none;}
+  .panel{padding:30px 18px;}
+}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const RAW = `
+abide (by...)|abode|abode|se conformer à (règles, lois)
+arise|arose|arisen|se présenter, surgir (problème)
+awake|awoke|awoken|s'éveiller
+be|was / were|been|être
+bear|bore|borne|supporter, porter (nom, message, ...)
+beat|beat|beaten|battre
+become|became|become|devenir
+begin|began|begun|commencer
+behold|beheld|beheld|contempler
+bend|bent|bent|(se) courber, (se) pencher
+beseech|besought|besought|supplier
+bet|bet|bet|parier
+bid|bade|bidden|ordonner, commander
+bind|bound|bound|lier, attacher
+bite|bit|bitten|mordre
+bleed|bled|bled|saigner
+blow|blew|blown|souffler
+break|broke|broken|briser
+breed|bred|bred|élever (animaux)
+bring|brought|brought|apporter
+build|built|built|construire
+burn|burnt / burned|burnt / burned|brûler
+burst|burst|burst|éclater
+buy|bought|bought|acheter
+cast|cast|cast|jeter, lancer (dé, sort)
+catch|caught|caught|attraper
+chide|chid|chid / chidden|gronder, réprimander
+choose|chose|chosen|choisir
+cling|clung|clung|s'accrocher, se cramponner
+come|came|come|venir
+cost|cost|cost|coûter
+creep|crept|crept|ramper
+cut|cut|cut|couper
+deal|dealt|dealt|distribuer, traiter (texte), s'occuper (de)
+dig|dug|dug|creuser
+do|did|done|faire
+draw|drew|drawn|dessiner, tirer (trait)
+dream|dreamt / dreamed|dreamt / dreamed|rêver
+drink|drank|drunk|boire
+drive|drove|driven|conduire
+dwell|dwelt|dwelt|demeurer, insister sur
+eat|ate|eaten|manger
+fall|fell|fallen|tomber
+feed|fed|fed|nourrir
+feel|felt|felt|sentir, ressentir
+fight|fought|fought|se battre, combattre
+find|found|found|trouver
+flee|fled|fled|fuir, s'enfuir
+fling|flung|flung|jeter, lancer violemment / brusquement
+fly|flew|flown|voler (avion, oiseau)
+forbid|forbade|forbidden|interdire
+forget|forgot|forgotten|oublier
+forgive|forgave|forgiven|pardonner
+forsake|forsook|forsaken|abandonner, délaisser
+freeze|froze|frozen|geler
+get|got|got|obtenir
+give|gave|given|donner
+go|went|gone|aller
+grind|ground|ground|moudre
+grow|grew|grown|grandir, faire pousser
+hang|hung|hung|suspendre, accrocher
+have|had|had|avoir
+hear|heard|heard|entendre
+hew|hewed|hewn|tailler (haie, arbre)
+hide|hid|hidden|cacher
+hit|hit|hit|frapper, atteindre
+hold|held|held|tenir
+hurt|hurt|hurt|blesser
+keep|kept|kept|garder
+kneel|knelt|knelt|s'agenouiller
+knit|knit / knitted|knit / knitted|tricoter
+know|knew|known|connaître
+lay|laid|laid|poser (à plat)
+lead|led|led|conduire, mener
+lean|leant|leant|se pencher, s'appuyer
+leap|leapt|leapt|bondir
+learn|learnt / learned|learnt / learned|apprendre
+leave|left|left|quitter
+lend|lent|lent|prêter
+let|let|let|laisser, permettre, louer
+lie|lay|lain|être allongé
+light|lit|lit / lighted|éclairer
+lose|lost|lost|perdre
+make|made|made|faire
+mean|meant|meant|signifier
+meet|met|met|rencontrer
+mistake|mistook|mistaken|se méprendre
+mow|mowed|mown / mowed|tondre, faucher
+overcome|overcame|overcome|surmonter
+pay|paid|paid|payer
+put|put|put|mettre
+read|read|read|lire
+ride|rode|ridden|aller à cheval / bicyclette / moto
+ring|rang|rung|sonner
+rise|rose|risen|se lever, s'élever
+run|ran|run|courir
+saw|sawed|sawn / sawed|scier
+say|said|said|dire
+see|saw|seen|voir
+seek|sought|sought|chercher, rechercher
+sell|sold|sold|vendre
+send|sent|sent|envoyer
+set|set|set|fixer, poser
+sew|sewed|sewn|coudre
+shed|shed|shed|verser (larmes)
+shake|shook|shaken|secouer
+shine|shone|shone|briller
+shoot|shot|shot|tirer (arme à feu), abattre
+show|showed|shown|montrer
+shrink|shrank|shrunk|rétrécir
+shut|shut|shut|fermer
+sing|sang|sung|chanter
+sink|sank|sunk|couler, sombrer
+sit|sat|sat|être assis
+slay|slew|slain|massacrer
+sleep|slept|slept|dormir
+slide|slid|slid|glisser
+sling|slung|slung|lancer (avec lance-pierre), mettre en bandoulière
+slink|slunk|slunk|aller (furtivement, honteusement)
+slit|slit|slit|fendre, inciser, trancher (gorge)
+smell|smelt / smelled|smelt / smelled|sentir (odeur)
+smite|smote|smitten|frapper violemment (figuré)
+sow|sowed|sown|semer
+speak|spoke|spoken|parler
+speed|sped|sped|(se) hâter
+spell|spelt|spelt|épeler
+spend|spent|spent|dépenser
+spill|spilt / spilled|spilt / spilled|répandre, renverser
+spin|spun|spun|filer (laine), tourner / aller à toute vitesse
+spit|spat|spat|cracher
+split|split|split|(se) fendre
+spoil|spoilt / spoiled|spoilt / spoiled|gâcher, gâter
+spread|spread|spread|étaler, répandre (rumeur)
+spring|sprang|sprung|jaillir, bondir
+stand|stood|stood|être debout
+steal|stole|stolen|dérober
+stick|stuck|stuck|coller
+sting|stung|stung|piquer
+stink|stank|stunk|sentir mauvais, puer
+strew|strewed|strewn / strewed|joncher (with, de)
+stride|strode|stridden|aller à grandes enjambées
+strike|struck|struck|frapper
+strive|strove|striven|s'efforcer
+swear|swore|sworn|jurer
+sweep|swept|swept|balayer
+swell|swelled|swollen / swelled|enfler
+swim|swam|swum|nager
+swing|swung|swung|(se) balancer
+take|took|taken|prendre
+teach|taught|taught|enseigner
+tear|tore|torn|déchirer
+tell|told|told|raconter
+think|thought|thought|penser
+thrive|throve|thriven|prospérer
+throw|threw|thrown|jeter
+thrust|thrust|thrust|pousser brusquement, enfoncer
+tread|trod|trodden|piétiner, fouler aux pieds
+undergo|underwent|undergone|subir
+understand|understood|understood|comprendre
+undo|undid|undone|défaire
+upset|upset|upset|bouleverser, renverser
+wake|woke|woken|se réveiller
+wear|wore|worn|porter (vêtements)
+weave|wove|woven|tisser
+weep|wept|wept|pleurer
+win|won|won|gagner
+wind|wound|wound|remonter (montre), faire marcher (up)
+withdraw|withdrew|withdrawn|(se) retirer
+withstand|withstood|withstood|résister à
+wring|wrung|wrung|tordre
+write|wrote|written|écrire
+`;
+
+const VERBS = RAW.trim().split('\n').map(line=>{
+  const [base,preterit,participe,traduction] = line.split('|');
+  return {base,preterit,participe,traduction};
+});
+
+const GROUP_SIZE = 20;
+const GROUPS = [];
+for (let i=0;i<VERBS.length;i+=GROUP_SIZE) GROUPS.push(VERBS.slice(i,i+GROUP_SIZE));
+
+const STORAGE_KEY = 'irregular-verbs-progress-v1';
+let progress = { unlockedGroups:1, bestTimes:{}, completedGroups:[] };
+let session = null;
+
+const ICONS = {
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>',
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5l12 7-12 7z"/></svg>'
+};
+
+function hasStorage(){
+  return typeof window!=='undefined' && !!window.storage && typeof window.storage.get==='function';
+}
+
+async function loadProgress(){
+  if (!hasStorage()) return;
+  try{
+    const res = await window.storage.get(STORAGE_KEY,false);
+    if (res && res.value){
+      const parsed = JSON.parse(res.value);
+      progress = Object.assign({unlockedGroups:1,bestTimes:{},completedGroups:[]},parsed);
+    }
+  }catch(e){ /* pas encore de progression enregistrée */ }
+}
+
+async function saveProgress(){
+  if (!hasStorage()) return;
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(progress), false); }
+  catch(e){ console.error('Sauvegarde impossible', e); }
+}
+
+function normalize(s){
+  return s.toString().trim().toLowerCase()
+    .replace(/[\u2019\u2018]/g,"'")
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ');
+}
+
+function expandAnswer(raw){
+  const variants = new Set();
+  const reflexiveRegex = /\((se|s')\)\s*/gi;
+  const withReflexive = raw.replace(reflexiveRegex,(m,p1)=>p1+(p1.endsWith("'")?'':' '));
+  const withoutReflexive = raw.replace(reflexiveRegex,'');
+  [withReflexive,withoutReflexive].forEach(str=>{
+    const cleaned = str.replace(/\([^)]*\)/g,'');
+    cleaned.split(/[,/]/).forEach(part=>{
+      const t = part.trim().replace(/\s+/g,' ');
+      if (t) variants.add(t);
+    });
+    const whole = cleaned.trim().replace(/\s+/g,' ');
+    if (whole) variants.add(whole);
+  });
+  return Array.from(variants);
+}
+
+function isCorrect(userInput, raw){
+  const n = normalize(userInput);
+  if (!n) return false;
+  return expandAnswer(raw).some(v=>normalize(v)===n);
+}
+
+function formatTime(ms){
+  if (ms==null) return '—:—.-';
+  const totalDeci = Math.floor(ms/100);
+  const deci = totalDeci%10;
+  const totalSec = Math.floor(ms/1000);
+  const sec = totalSec%60;
+  const min = Math.floor(totalSec/60);
+  return String(min).padStart(2,'0')+':'+String(sec).padStart(2,'0')+'.'+deci;
+}
+
+const app = document.getElementById('app');
+
+function renderGroupRow(group,i){
+  const num = i+1;
+  const start = i*GROUP_SIZE+1;
+  const end = start+group.length-1;
+  const isUnlocked = num<=progress.unlockedGroups;
+  const isDone = progress.completedGroups.includes(num);
+  const best = progress.bestTimes[num];
+  const firstV = group[0].base.split(' (')[0];
+  const lastV = group[group.length-1].base.split(' (')[0];
+
+  let statusHtml;
+  if (!isUnlocked) statusHtml = '<span class="status locked">'+ICONS.lock+'Verrouillé</span>';
+  else if (isDone) statusHtml = '<span class="status done">'+ICONS.check+formatTime(best)+'</span>';
+  else statusHtml = '<span class="status ready">'+ICONS.play+'À faire</span>';
+
+  const attrs = isUnlocked
+    ? 'data-action="start-group" data-index="'+i+'" tabindex="0" role="button"'
+    : 'aria-disabled="true" title="Termine le groupe précédent pour débloquer celui-ci."';
+
+  return '<li class="row '+(!isUnlocked?'is-locked':'')+'" '+attrs+'>'
+    + '<span class="row-num">'+String(num).padStart(2,'0')+'</span>'
+    + '<span class="row-range">'+start+'–'+end+'</span>'
+    + '<span class="row-preview">'+firstV+' – '+lastV+'</span>'
+    + statusHtml
+    + '</li>';
+}
+
+function renderHome(){
+  const doneCount = progress.completedGroups.length;
+  app.innerHTML =
+    '<div class="wrap">'
+    + '<div class="top">'
+    +   '<span class="brand">Verbes irréguliers</span>'
+    +   '<span class="stat">'+doneCount+'/'+GROUPS.length+' groupes validés</span>'
+    + '</div>'
+    + '<div class="intro">'
+    +   '<h1>Un faux pas, retour à la case zéro.</h1>'
+    +   '<p class="lede">171 verbes irréguliers répartis en 9 groupes de 20, toujours dans le même ordre. Pour chaque verbe : prétérit, participe passé et traduction. Une seule erreur renvoie au premier verbe du groupe ; un sans-faute débloque les 20 suivants.</p>'
+    +   '<p class="caption">Rythme conseillé : 20 verbes par semaine. Une fois les 9 groupes validés, on reprend au premier jusqu\u2019au concours.</p>'
+    + '</div>'
+    + '<ol class="ledger">'
+    +   GROUPS.map((g,i)=>renderGroupRow(g,i)).join('')
+    + '</ol>'
+    + '<button class="reset-link" data-action="reset-progress" type="button">Réinitialiser la progression</button>'
+    + '</div>';
+}
+
+function renderDots(total,currentIdx){
+  let html='';
+  for (let i=0;i<total;i++){
+    let cls='dot';
+    if (i<currentIdx) cls+=' done';
+    else if (i===currentIdx) cls+=' current';
+    html+='<span class="'+cls+'"></span>';
+  }
+  return html;
+}
+
+function startTimerDisplay(){
+  if (session.timerHandle) clearInterval(session.timerHandle);
+  session.timerHandle = setInterval(()=>{
+    const el = document.getElementById('timer');
+    if (el) el.textContent = formatTime(Date.now()-session.startTime);
+  },100);
+}
+
+function renderSessionScreen(){
+  const group = GROUPS[session.groupIndex];
+  const verb = group[session.verbIndex];
+  const groupNum = session.groupIndex+1;
+  const start = session.groupIndex*GROUP_SIZE+1;
+  const end = start+group.length-1;
+
+  app.innerHTML =
+    '<div class="wrap session">'
+    + '<div class="top">'
+    +   '<button class="ghost-btn" data-action="back-home" type="button">\u2190 Menu</button>'
+    +   '<span class="group-tag">Groupe '+groupNum+' ('+start+'–'+end+')</span>'
+    +   '<span class="timer" id="timer">'+formatTime(Date.now()-session.startTime)+'</span>'
+    + '</div>'
+    + '<div class="dots">'+renderDots(group.length,session.verbIndex)+'</div>'
+    + '<div class="panel" id="panel">'
+    +   '<div class="verb-display">'+verb.base+'</div>'
+    +   '<form id="answer-form" autocomplete="off">'
+    +     '<label class="field"><span class="field-label">Prétérit</span>'
+    +       '<input type="text" id="input-preterit" autocomplete="off" autocapitalize="off" spellcheck="false" />'
+    +       '<div class="field-feedback" id="fb-preterit"></div></label>'
+    +     '<label class="field"><span class="field-label">Participe passé</span>'
+    +       '<input type="text" id="input-participe" autocomplete="off" autocapitalize="off" spellcheck="false" />'
+    +       '<div class="field-feedback" id="fb-participe"></div></label>'
+    +     '<label class="field"><span class="field-label">Traduction</span>'
+    +       '<input type="text" id="input-traduction" autocomplete="off" autocapitalize="off" spellcheck="false" />'
+    +       '<div class="field-feedback" id="fb-traduction"></div></label>'
+    +     '<div class="actions" id="actions">'
+    +       '<button class="primary-btn" type="submit">Vérifier</button>'
+    +     '</div>'
+    +   '</form>'
+    + '</div>'
+    + '</div>';
+
+  const first = document.getElementById('input-preterit');
+  if (first) first.focus();
+  startTimerDisplay();
+}
+
+function renderCompleteScreen(finalTime,isRecord,prevBest){
+  const groupNum = session.groupIndex+1;
+  const hasNext = groupNum < GROUPS.length;
+  let recordLine;
+  if (isRecord && prevBest!=null) recordLine = 'Nouveau record pour ce groupe (ancien : '+formatTime(prevBest)+').';
+  else if (isRecord) recordLine = 'Premier sans-faute sur ce groupe — le record est posé.';
+  else recordLine = 'Record du groupe : '+formatTime(prevBest);
+
+  app.innerHTML =
+    '<div class="wrap session">'
+    + '<div class="panel">'
+    +   '<h2 class="complete-title">Groupe '+groupNum+' terminé</h2>'
+    +   '<div class="big-time">'+formatTime(finalTime)+'</div>'
+    +   '<p class="record-line">'+recordLine+'</p>'
+    +   '<div class="actions">'
+    +     (hasNext
+          ? '<button class="primary-btn" data-action="next-group" type="button">Groupe suivant</button>'
+          : '<p class="done-all">Les 171 verbes sont validés. Reprends au groupe 1 jusqu\u2019au concours.</p>')
+    +     '<button class="ghost-btn" data-action="replay-group" type="button">Refaire ce groupe</button>'
+    +     '<button class="ghost-btn" data-action="back-home" type="button">Retour au menu</button>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function startSession(groupIndex){
+  session = { groupIndex, verbIndex:0, startTime:Date.now(), timerHandle:null };
+  renderSessionScreen();
+}
+
+function restartCurrentGroup(){
+  session.verbIndex = 0;
+  session.startTime = Date.now();
+  renderSessionScreen();
+}
+
+function handleCorrect(){
+  const panel = document.getElementById('panel');
+  panel.classList.add('flash-go');
+  document.querySelectorAll('#answer-form input').forEach(i=>i.disabled=true);
+  setTimeout(()=>{
+    session.verbIndex++;
+    const group = GROUPS[session.groupIndex];
+    if (session.verbIndex>=group.length){
+      finishGroup();
+    } else {
+      renderSessionScreen();
+    }
+  },450);
+}
+
+function handleWrong(verb,results){
+  clearInterval(session.timerHandle);
+  const panel = document.getElementById('panel');
+  panel.classList.add('flash-stop');
+  ['preterit','participe','traduction'].forEach(field=>{
+    const input = document.getElementById('input-'+field);
+    const fb = document.getElementById('fb-'+field);
+    input.disabled = true;
+    if (results[field]) { input.classList.add('ok'); }
+    else { input.classList.add('bad'); fb.textContent = 'Réponse : '+verb[field]; }
+  });
+  document.getElementById('actions').innerHTML =
+    '<p class="error-msg">Série interrompue — retour au verbe 1 du groupe.</p>'
+    + '<button class="primary-btn" type="button" data-action="restart-group">Recommencer le groupe</button>';
+}
+
+async function finishGroup(){
+  clearInterval(session.timerHandle);
+  const finalTime = Date.now()-session.startTime;
+  const groupNum = session.groupIndex+1;
+  const prevBest = progress.bestTimes[groupNum];
+  const isRecord = prevBest==null || finalTime<prevBest;
+  if (isRecord) progress.bestTimes[groupNum]=finalTime;
+  if (!progress.completedGroups.includes(groupNum)) progress.completedGroups.push(groupNum);
+  if (groupNum===progress.unlockedGroups && groupNum<GROUPS.length) progress.unlockedGroups=groupNum+1;
+  await saveProgress();
+  renderCompleteScreen(finalTime,isRecord,prevBest);
+}
+
+async function resetProgress(){
+  if (!confirm('Réinitialiser toute la progression ? Cette action efface les groupes débloqués et les records.')) return;
+  progress = { unlockedGroups:1, bestTimes:{}, completedGroups:[] };
+  await saveProgress();
+  renderHome();
+}
+
+app.addEventListener('click',(e)=>{
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+  if (action==='start-group') startSession(Number(el.dataset.index));
+  else if (action==='back-home'){ if (session) clearInterval(session.timerHandle); session=null; renderHome(); }
+  else if (action==='restart-group') restartCurrentGroup();
+  else if (action==='next-group') startSession(session.groupIndex+1);
+  else if (action==='replay-group') startSession(session.groupIndex);
+  else if (action==='reset-progress') resetProgress();
+});
+
+app.addEventListener('keydown',(e)=>{
+  if (e.key!=='Enter' && e.key!==' ') return;
+  const el = e.target.closest('li[data-action]');
+  if (!el) return;
+  e.preventDefault();
+  el.click();
+});
+
+app.addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const form = e.target;
+  if (!form || form.id!=='answer-form' || !session) return;
+  const group = GROUPS[session.groupIndex];
+  const verb = group[session.verbIndex];
+  const values = {
+    preterit: document.getElementById('input-preterit').value,
+    participe: document.getElementById('input-participe').value,
+    traduction: document.getElementById('input-traduction').value,
+  };
+  const results = {
+    preterit: isCorrect(values.preterit, verb.preterit),
+    participe: isCorrect(values.participe, verb.participe),
+    traduction: isCorrect(values.traduction, verb.traduction),
+  };
+  if (results.preterit && results.participe && results.traduction) handleCorrect();
+  else handleWrong(verb,results);
+});
+
+async function init(){
+  app.innerHTML = '<div class="wrap"><p class="loading">Chargement…</p></div>';
+  await loadProgress();
+  renderHome();
+}
+
+init();
+</script>
+</body>
+</html>
